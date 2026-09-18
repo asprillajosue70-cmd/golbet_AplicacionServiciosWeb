@@ -2,14 +2,14 @@
 > Sistema web para la gestión eficiente de apuestas deportivas.
 
 ---
-##ÍNDICE
+## ÍNDICE
 - [Descripción](#descripción)
 - [Estudiante](#Estudiante)
 
-##Descripción
+## Descripción
 Golbet, es un sistema web de apuestas que tiene como objetivo, fácilitar el proceso de apostar en línea a diversos partidos, sin arriesgar dinero real hasta el momento de completar la transacción.
 
-##Estudiante
+## Estudiante
 
 | Josué Asprilla Palacios |
 
