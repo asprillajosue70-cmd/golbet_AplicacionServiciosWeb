@@ -1,118 +1,177 @@
-﻿@using GolBet.Entities.Enums
+﻿
+@using GolBet.Entities.Enums
 @using GolBet.Web.Helpers
 @model IEnumerable<GolBet.Services.DTOs.MatchDto>
+
 @{
     ViewData["Title"] = "Partidos";
-}
-@{
     var current = (MatchStatus?)ViewBag.CurrentStatus;
 }
+
 <div class="d-flex gap-2 flex-wrap mb-4">
     <a asp-action="Index"
-       class="btn btn-sm @(current is null ? "btn-success" : "btn-outline-success")">
+       asp-route-search="@ViewBag.CurrentSearch"
+       class="match-status-filter btn btn-sm @(current is null ? "btn-success" : "btn-outline-success")">
         Todos
     </a>
-    <a asp-action="Index" asp-route-status="@MatchStatus.Scheduled"
-       class="btn btn-sm @(current == MatchStatus.Scheduled ? "btn-success" : "btn-outlinesuccess")">
+
+    <a asp-action="Index"
+       asp-route-status="@MatchStatus.Scheduled"
+       asp-route-search="@ViewBag.CurrentSearch"
+       class="match-status-filter btn btn-sm @(current == MatchStatus.Scheduled ? "btn-success" : "btn-outline-success")">
         Programados
     </a>
-    <a asp-action="Index" asp-route-status="@MatchStatus.InProgress"
-       class="btn btn-sm @(current == MatchStatus.InProgress ? "btn-success" : "btn-outlinesuccess")">
+
+    <a asp-action="Index"
+       asp-route-status="@MatchStatus.InProgress"
+       asp-route-search="@ViewBag.CurrentSearch"
+       class="match-status-filter btn btn-sm @(current == MatchStatus.InProgress ? "btn-success" : "btn-outline-success")">
         En juego
     </a>
-    <a asp-action="Index" asp-route-status="@MatchStatus.Finished"
-       class="btn btn-sm @(current == MatchStatus.Finished ? "btn-success" : "btn-outlinesuccess")">
+
+    <a asp-action="Index"
+       asp-route-status="@MatchStatus.Finished"
+       asp-route-search="@ViewBag.CurrentSearch"
+       class="match-status-filter btn btn-sm @(current == MatchStatus.Finished ? "btn-success" : "btn-outline-success")">
         Finalizados
     </a>
 </div>
 
+<form asp-action="Index"
+      method="get"
+      id="matchSearchForm"
+      class="mb-4">
+
+    <input type="hidden" name="status" value="@current" />
+
+    <label for="matchSearch" class="form-label">
+        Buscar partidos por equipo
+    </label>
+
+    <div class="input-group">
+        <span class="input-group-text">
+            <i class="bi bi-search"></i>
+        </span>
+
+        <input type="search"
+               id="matchSearch"
+               name="search"
+               class="form-control"
+               placeholder="Ej. Atlético Nacional..."
+               value="@ViewBag.CurrentSearch"
+               autocomplete="off" />
+
+        <button type="submit" class="btn btn-success">
+            Buscar
+        </button>
+    </div>
+</form>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
- <h2>  Cartelera de partidos</h2>
-@if (User.IsInRole("Admin"))
-{
- <a asp-action="Create" class="btn btn-success">+ Nuevo partido</a>
-}
+    <h2>Cartelera de partidos</h2>
 
-</div>
-
-<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-    @foreach (var match in Model)
+    @if (User.IsInRole("Admin"))
     {
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <small class="text-muted">
-                        @match.Date.ToColombiaTime().ToString("ddd dd MMM · h:mm tt")
-                    </small>
-                    @switch (match.Status)
-                    {
-                        case MatchStatus.Scheduled:
-                            <span class="badge bg-primary">Programado</span>
-                            break;
-                        case MatchStatus.InProgress:
-                            <span class="badge bg-warning text-dark">En juego</span>
-                            break;
-                        case MatchStatus.Finished:
-                            <span class="badge bg-secondary">Finalizado</span>
-                            break;
-                    }
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center text-center">
-                        <div class="w-100">
-                            <img src="@(match.HomeTeamCrestUrl ??
-                                 "https://placehold.co/60x60/e9ecef/6c757d?text=FC")"
-                                 alt="@match.HomeTeamName" width="60" height="60" class="mb-1" />
-                            <div class="fw-bold small">@match.HomeTeamName</div>
-                        </div>
-                        <div class="px-3 text-nowrap">
-                            @if (match.Status == MatchStatus.Finished)
-                            {
-                                <span class="fs-3 fw-bold">
-                                    @match.HomeGoals -
-                                    @match.AwayGoals
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="fs-4 text-muted">vs</span>
-                            }
-                        </div>
-                        <div class="w-100">
-                            <img src="@(match.AwayTeamCrestUrl ??
-                                 "https://placehold.co/60x60?text= ")"
-                                 alt="@match.AwayTeamName" width="60" height="60" class="mb-1" />
-                            <div class="fw-bold small">@match.AwayTeamName</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="row g-2 text-center">
-                        <div class="col">
-                            <div class="border rounded py-1">
-                                <small class="text-muted d-block">1 · Local</small>
-                                <span class="fw-bold">@match.HomeOdds.ToString("0.00")</span>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="border rounded py-1">
-                                <small class="text-muted d-block">X · Empate</small>
-                                <span class="fw-bold">@match.DrawOdds.ToString("0.00")</span>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="border rounded py-1">
-                                <small class="text-muted d-block">2 · Visitante</small>
-                                <span class="fw-bold">@match.AwayOdds.ToString("0.00")</span>
-                            </div>
-                        </div>
-                    </div>
-                    <a asp-action="Detail" asp-route-id="@match.Id"
-                       class="btn btn-sm btn-outline-secondary w-100 mt-2">
-                        Ver detalle
-                    </a>
-                </div>
-            </div>
-        </div>
+        <a asp-action="Create" class="btn btn-success">+ Nuevo partido</a>
     }
 </div>
+
+<div id="matchResults">
+    @await Html.PartialAsync("_MatchCards", Model)
+</div>
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById("matchSearch");
+        const searchForm = document.getElementById("matchSearchForm");
+        const resultsContainer = document.getElementById("matchResults");
+
+        let searchTimeout;
+        let activeRequestController;
+
+        function updateStatusFilterLinks() {
+            const search = searchInput.value.trim();
+
+            document.querySelectorAll(".match-status-filter").forEach(link => {
+                const url = new URL(link.href);
+
+                if (search) {
+                    url.searchParams.set("search", search);
+                } else {
+                    url.searchParams.delete("search");
+                }
+
+                link.href = url.toString();
+            });
+        }
+
+        async function searchMatches() {
+            clearTimeout(searchTimeout);
+
+            if (activeRequestController) {
+                activeRequestController.abort();
+            }
+
+            const controller = new AbortController();
+            activeRequestController = controller;
+
+            const params = new URLSearchParams(
+                new FormData(searchForm)
+            );
+
+            const url = new URL(
+                searchForm.action,
+                window.location.origin
+            );
+
+            url.search = params.toString();
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    signal: controller.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error("No se pudieron cargar los partidos.");
+                }
+
+                const html = await response.text();
+
+                if (activeRequestController !== controller) {
+                    return;
+                }
+
+                resultsContainer.innerHTML = html;
+
+                window.history.replaceState(null, "", url);
+
+                updateStatusFilterLinks();
+            }
+            catch (error) {
+                if (error.name !== "AbortError") {
+                    console.error(error);
+                }
+            }
+        }
+
+        searchInput.addEventListener("input", function () {
+            updateStatusFilterLinks();
+
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(function () {
+                searchMatches();
+            }, 300);
+        });
+
+        searchForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            searchMatches();
+        });
+
+        updateStatusFilterLinks();
+    </script>
+}
