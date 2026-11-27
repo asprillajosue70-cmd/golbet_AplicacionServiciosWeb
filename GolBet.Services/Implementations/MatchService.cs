@@ -5,6 +5,7 @@ using GolBet.Repositories.Interfaces;
 using GolBet.Services.DTOs;
 using GolBet.Services.Helpers;
 using GolBet.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 namespace GolBet.Services.Implementations;
 
 public class MatchService : IMatchService
@@ -15,11 +16,14 @@ public class MatchService : IMatchService
 
     private readonly IMapper _mapper;
 
-    public MatchService(IMatchRepository matchRepository, IBetRepository betRepository, IMapper mapper)
+    private readonly ILogger<MatchService> _logger;
+
+    public MatchService(IMatchRepository matchRepository, IBetRepository betRepository, IMapper mapper, ILogger<MatchService> logger)
     {
         _matchRepository = matchRepository;
         _betRepository = betRepository;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<MatchDto>> GetBoardAsync(
@@ -121,6 +125,13 @@ public class MatchService : IMatchService
         }
         // 4. ONE save: the match, every bet and every balance — ONE transaction
         await _matchRepository.UpdateAsync(match);
+
+        _logger.LogInformation(
+            "Match {MatchId} closed {HomeGoals}-{AwayGoals}: " +
+            "{ResolvedBets} bets resolved, {WonBets} won, {TotalPaid} paid",
+            match.Id, dto.HomeGoals, dto.AwayGoals,
+            summary.ResolvedBets, summary.WonBets, summary.TotalPaid);
+
         return summary;
     }
     private static BetPick GetWinningPick(int homeGoals, int awayGoals)
